@@ -6,7 +6,6 @@ import {
   Signer,
 } from '@nucypher/nucypher-core';
 
-import { Configuration } from '../config';
 import { Keyring } from '../keyring';
 import { PolicyMessageKit } from '../kits/message';
 import { RetrievalResult } from '../kits/retrieval';
@@ -14,42 +13,28 @@ import { zip } from '../utils';
 
 import { Porter } from './porter';
 
-export class RemoteBob {
-  private constructor(
-    public readonly decryptingKey: PublicKey,
-    public readonly verifyingKey: PublicKey
-  ) {}
-
-  public static fromKeys(
-    decryptingKey: PublicKey | Uint8Array,
-    verifyingKey: PublicKey | Uint8Array
-  ): RemoteBob {
-    const dk =
-      decryptingKey instanceof PublicKey
-        ? decryptingKey
-        : PublicKey.fromBytes(decryptingKey);
-    const vk =
-      verifyingKey instanceof PublicKey
-        ? verifyingKey
-        : PublicKey.fromBytes(verifyingKey);
-    return new RemoteBob(dk, vk);
-  }
-}
-
-export class Bob {
+export class tDecDecrypter {
   private readonly porter: Porter;
   private readonly keyring: Keyring;
+  private readonly verifyingKey: Keyring;
 
-  constructor(config: Configuration, secretKey: SecretKey) {
-    this.porter = new Porter(config.porterUri);
+  constructor(
+    porterUri: string,
+    private readonly policyEncryptingKey: PublicKey,
+    readonly encryptedTreasureMap: EncryptedTreasureMap,
+    private readonly publisherVerifyingKey: PublicKey,
+    secretKey: SecretKey,
+    verifyingKey: SecretKey
+  ) {
+    this.porter = new Porter(porterUri);
     this.keyring = new Keyring(secretKey);
+    this.policyEncryptingKey = policyEncryptingKey;
+    this.encryptedTreasureMap = encryptedTreasureMap;
+    this.publisherVerifyingKey = publisherVerifyingKey;
+    this.verifyingKey = new Keyring(verifyingKey);
   }
 
   public get decryptingKey(): PublicKey {
-    return this.keyring.publicKey;
-  }
-
-  public get verifyingKey(): PublicKey {
     return this.keyring.publicKey;
   }
 
@@ -57,29 +42,14 @@ export class Bob {
     return this.keyring.signer;
   }
 
-  public static fromSecretKey(
-    config: Configuration,
-    secretKey: SecretKey
-  ): Bob {
-    return new Bob(config, secretKey);
-  }
-
   public decrypt(messageKit: MessageKit | PolicyMessageKit): Uint8Array {
     return this.keyring.decrypt(messageKit);
   }
 
   public async retrieveAndDecrypt(
-    policyEncryptingKey: PublicKey,
-    publisherVerifyingKey: PublicKey,
-    messageKits: readonly MessageKit[],
-    encryptedTreasureMap: EncryptedTreasureMap
+    messageKits: readonly MessageKit[]
   ): Promise<readonly Uint8Array[]> {
-    const policyMessageKits = await this.retrieve(
-      policyEncryptingKey,
-      publisherVerifyingKey,
-      messageKits,
-      encryptedTreasureMap
-    );
+    const policyMessageKits = await this.retrieve(messageKits);
 
     policyMessageKits.forEach((mk) => {
       if (!mk.isDecryptableByReceiver()) {
@@ -93,20 +63,17 @@ export class Bob {
   }
 
   public async retrieve(
-    policyEncryptingKey: PublicKey,
-    publisherVerifyingKey: PublicKey,
-    messageKits: readonly MessageKit[],
-    encryptedTreasureMap: EncryptedTreasureMap
+    messageKits: readonly MessageKit[]
   ): Promise<readonly PolicyMessageKit[]> {
-    const treasureMap = encryptedTreasureMap.decrypt(
+    const treasureMap = this.encryptedTreasureMap.decrypt(
       this.keyring.secretKey,
-      publisherVerifyingKey
+      this.publisherVerifyingKey
     );
 
     const policyMessageKits = messageKits.map((mk) =>
       PolicyMessageKit.fromMessageKit(
         mk,
-        policyEncryptingKey,
+        this.policyEncryptingKey,
         treasureMap.threshold
       )
     );
@@ -115,9 +82,9 @@ export class Bob {
     const retrieveCFragsResponses = await this.porter.retrieveCFrags(
       treasureMap,
       retrievalKits,
-      publisherVerifyingKey,
+      this.publisherVerifyingKey,
       this.decryptingKey,
-      this.verifyingKey
+      this.verifyingKey.publicKey
     );
 
     return zip(policyMessageKits, retrieveCFragsResponses).map((pair) => {
@@ -125,8 +92,8 @@ export class Bob {
       const results = Object.keys(cFragResponse).map((address) => {
         const verified = cFragResponse[address].verify(
           messageKit.capsule,
-          publisherVerifyingKey,
-          policyEncryptingKey,
+          this.publisherVerifyingKey,
+          this.policyEncryptingKey,
           this.decryptingKey
         );
         return [address, verified];

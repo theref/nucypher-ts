@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.7.9-alpha.1](https://github.com/nucypher/nucypher-ts/compare/v0.7.4...v0.7.9-alpha.1) (2022-08-19)
+
+
+### Features
+
+* expose ConditionSet type ([7f28169](https://github.com/nucypher/nucypher-ts/commit/7f281699e730f3eed5ca283a7f954f8ed9308490))
+
+
+### Bug Fixes
+
+* **test:** add mocks to tdec test suite ([fe72c0f](https://github.com/nucypher/nucypher-ts/commit/fe72c0f2a4e3f0dd42cb2595c7badb9a69fee527))
+* **test:** skip a flow failining because of compatibility issues ([d86f10b](https://github.com/nucypher/nucypher-ts/commit/d86f10b863d2b76f71584c5fe8e3550bd1ed3da6))
+
+### [0.7.9-alpha.0](https://github.com/nucypher/nucypher-ts/compare/v0.7.8...v0.7.9-alpha.0) (2022-08-16)
+
+### [0.7.4](https://github.com/nucypher/nucypher-ts/compare/v0.7.3...v0.7.4) (2022-08-10)
+
+### [0.7.3](https://github.com/nucypher/nucypher-ts/compare/v0.7.2...v0.7.3) (2022-08-10)
+
+
+### Features
+
+* expose more types ([fd0f857](https://github.com/nucypher/nucypher-ts/commit/fd0f8575dfb3546359efa27b199536e393f67b98))
+
+### [0.7.2](https://github.com/nucypher/nucypher-ts/compare/v0.7.1...v0.7.2) (2022-07-27)
+
+
+### Features
+
+* expose pre enacted policy type ([e54099e](https://github.com/nucypher/nucypher-ts/commit/e54099e0c23902347596e9ac272baac132a0044f))
+
+### [0.7.1](https://github.com/nucypher/nucypher-ts/compare/v0.7.0...v0.7.1) (2022-07-16)
+
+
+### Features
+
+* expose encrypted treasue map type ([1c18001](https://github.com/nucypher/nucypher-ts/commit/1c1800185fcc9a0600f38372624a6e54a924fe9f))
+
 ## [0.7.0](https://github.com/nucypher/nucypher-ts/compare/v0.6.1...v0.7.0) (2022-04-14)
 
 ### ⚠ BREAKING CHANGES

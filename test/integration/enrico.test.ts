@@ -1,8 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Enrico } from '../../src';
+import { ConditionsIntegrator } from '../../src/core';
 import { PolicyMessageKit } from '../../src/kits/message';
 import { RetrievalResult } from '../../src/kits/retrieval';
+import { Conditions, ConditionSet } from '../../src/policies/conditions';
 import { toBytes } from '../../src/utils';
-import { bytesEqual, fromBytes, mockAlice, mockBob, reencryptKFrags } from '../utils';
+import {
+  bytesEqual,
+  fromBytes,
+  mockAlice,
+  mockBob,
+  reencryptKFrags,
+} from '../utils';
 
 describe('enrico', () => {
   it('alice decrypts message encrypted by enrico', async () => {
@@ -43,14 +52,14 @@ describe('enrico', () => {
       bob,
       label,
       threshold,
-      shares,
+      shares
     );
     expect(delegatingKey.toBytes()).toEqual(policyEncryptingKey.toBytes());
 
     // Bob can decrypt re-encrypted ciphertext
     const { verifiedCFrags } = reencryptKFrags(
       verifiedKFrags,
-      encrypted.capsule,
+      encrypted.capsule
     );
     const bobSk = (bob as any).keyring.secretKey;
 
@@ -69,11 +78,52 @@ describe('enrico', () => {
     const pk = PolicyMessageKit.fromMessageKit(
       encrypted,
       policyEncryptingKey,
-      threshold,
+      threshold
     ).withResult(result);
     expect(pk.isDecryptableByReceiver()).toBeTruthy();
 
     const decrypted = bob.decrypt(pk);
     expect(bytesEqual(decrypted, plaintextBytes)).toBeTruthy();
+  });
+
+  it('erico generates a message kit with conditions', async () => {
+    const label = 'fake-label';
+    const message = 'fake-message';
+    const alice = mockAlice();
+
+    const policyKey = alice.getPolicyEncryptingKeyFromLabel(label);
+
+    const ownsBufficornNFT = new Conditions.ERC721Ownership({
+      contractAddress: '0x1e988ba4692e52Bc50b375bcC8585b95c48AaD77',
+      parameters: [3591],
+    });
+
+    const conditions = new ConditionSet([ownsBufficornNFT]);
+    // console.log(conditions.toJSON())
+
+    const enrico = new Enrico(policyKey, undefined, conditions);
+    const encrypted = enrico.encryptMessage(toBytes(message));
+
+    const bytes = encrypted.toBytes();
+    expect(bytes).toContain(188); // the ESC delimter
+
+    // uncomment the following two lines to try out this output in python
+    // const b64 = Buffer.from(bytes).toString('base64');
+    // console.log(b64)
+
+    const conditionbytes = ConditionsIntegrator.parse(bytes).conditionsBytes;
+
+    // now take the bytes and remake a ConditionSet
+    if (conditionbytes) {
+      const reconstituted = ConditionSet.fromBytes(conditionbytes);
+      expect(reconstituted.toList()[0].contractAddress).toEqual(
+        ownsBufficornNFT.value.contractAddress
+      );
+    }
+
+    const aliceKeyring = (alice as any).keyring;
+    const aliceSk = await aliceKeyring.getSecretKeyFromLabel(label);
+    const alicePlaintext = encrypted.decrypt(aliceSk);
+    expect(alicePlaintext).toEqual(alicePlaintext);
   });
 });
