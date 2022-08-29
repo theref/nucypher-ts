@@ -8,7 +8,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 const config = {
   title: 'Nucypher TS',
   tagline: 'Interact with Nucypher via the browser',
-  url: 'https://your-docusaurus-test-site.com',
+  url: 'https://theref.github.io',
   baseUrl: '/',
   onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
@@ -16,8 +16,9 @@ const config = {
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'nucypher', // Usually your GitHub org/user name.
+  organizationName: 'theref', // Usually your GitHub org/user name.
   projectName: 'nucyphyer-ts', // Usually your repo name.
+  trailingSlash: false,
 
   // Even if you don't use internalization, you can use this field to set useful
   // metadata like html lang. For example, if your site is Chinese, you may want
