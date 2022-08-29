@@ -8,8 +8,8 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 const config = {
   title: 'Nucypher TS',
   tagline: 'Interact with Nucypher via the browser',
-  url: 'https://theref.github.io',
-  baseUrl: '/',
+  url: 'https://jamescampbell.org.uk',
+  baseUrl: '/nucypher-ts.',
   onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'favicon.ico',
