@@ -29,6 +29,7 @@ export const rpcConditionSchema = baseConditionSchema.extend({
   conditionType: z.literal(RpcConditionType).default(RpcConditionType),
   chain: createUnionSchema(SUPPORTED_CHAIN_IDS),
   method: z.enum(['eth_getBalance']),
+  endpoint: z.string().url().optional(),
   parameters: z.union([
     // Spec requires 2 parameters: an address and a block identifier
     z.tuple([EthAddressOrContextVariableSchema, BlockOrContextParamSchema]),

@@ -79,6 +79,7 @@ export const contractConditionSchema = rpcConditionSchema
     contractAddress: EthAddressSchema,
     standardContractType: z.enum(['ERC20', 'ERC721']).optional(),
     method: z.string(),
+    endpoint: z.string().url().optional(),
     functionAbi: functionAbiSchema.optional(),
     parameters: z.array(paramOrContextParamSchema),
   })
